@@ -1,3 +1,4 @@
+import math
 from labyrinth_game import constants, player_actions 
 
 #функция описания комнаты принмает словарь в качестве аргумента и получает из константы все данные
@@ -43,7 +44,8 @@ def solve_puzzle(game_state):
     
     player_answer = player_actions.get_input('\n Ваш ответ на загадку: ') #получаем ответ игрока
     
-    if player_answer.lower() == puzzle_answer.lower():
+    #т.к. я поменял структуру ответов на загадки в constants, тут теперь идет проверка по каждому элементу списка ответов
+    if player_answer.lower() in [each_answer.lower() for each_answer in puzzle_answer]:
         print('\n Вы верно решили загадку! Поздравляем!!')
         room_info['puzzle'] = None
         
@@ -65,7 +67,13 @@ def solve_puzzle(game_state):
             print('\n Загадка успешно решена, но изменений вы не заметили. Зато потренировали мозг.')
     
     else:
-        print('\n Неверно. Попробуйте снова.')
+
+        #если игрок ошибся в ответе в trap_room - запускаем trigger_trap()
+        if room_name == 'trap_room':
+            print('Вы оступились')
+            trigger_trap(game_state)
+        else:
+            print('\n Неверно. Попробуйте снова.')
         
 #логика победы    
 def attempt_open_treasure(game_state):
@@ -99,7 +107,7 @@ def attempt_open_treasure(game_state):
         player_answer = player_actions.get_input('Ваш ответ: ')
         
         #сверяем ответ игрока с изначально заложенным в загадку
-        if player_answer.lower() == puzzle_answer.lower():
+        if player_answer.lower() in [each_answer.lower() for each_answer in puzzle_answer]:
             print('\n Ваш код подошел!')
             
             #если ответ подошел - удаляем сундук
@@ -119,16 +127,91 @@ def attempt_open_treasure(game_state):
         print('\n Вы отступаете от сундука.')
         
 #функция помощи
-def show_help():
-    print("\nДоступные команды:")
-    print("  go <direction>  - перейти в направлении (north/south/east/west)")
-    print("  look            - осмотреть текущую комнату")
-    print("  take <item>     - поднять предмет")
-    print("  use <item>      - использовать предмет из инвентаря")
-    print("  inventory       - показать инвентарь")
-    print("  solve           - попытаться решить загадку в комнате")
-    print("  quit            - выйти из игры")
-    print("  help            - показать это сообщение")
-        
+def show_help(commands):
+    for command, description in commands.items():
+        print(f"  {command:<16} - {description}") #скажу честно, это ии, я вообще не понял/забыл про "позиционирование слева" и "дополнение пробелами в количестве 16 штук", извините
+
+
+
+ #немного случайности в путешествии
+def pseudo_random(seed, modulo):
+    #возьмем синус от seed, умноженного на число с дробной частью
+    sin_seed = math.sin(seed * 12.9898)
     
+    #умножим его на другое рандомное число
+    sin_seed_multi = sin_seed * 43758.5453
+    
+    #отбросим целую часть
+    sin_seed_multi_fracture = sin_seed_multi - math.floor(sin_seed_multi)
+    
+    #умножим её на modulo
+    final_value = sin_seed_multi_fracture * modulo
+    
+    #возвращаем целое число
+    return int(final_value)
+
+#ловушки повсюду
+def trigger_trap(game_state):
+    print('\n Ловушка активирована! Пол стал дрожать...')
+    
+    player_inventory = game_state['player_inventory']
+    
+    #смотрим, есть ли в инвентаре игрока предметы
+    if player_inventory:
+        #рандомно выбираем один предмет из инвентаря
+        item_losing_process = pseudo_random(game_state['steps_taken'], len(player_inventory))
+        
+        #игрок его теряет
+        item_lost = player_inventory.pop(item_losing_process)
+        
+        print(f'\n От дрожи вы упали, ударились головой об пол и выронили {item_lost}. Сожалеем о вашей потере.')
+    
+    #нет предметов - роллим урон
+    else:
+        damage_to_player_rng = pseudo_random(game_state['steps_taken'], 10)
+        
+        #неповезло - проигрыш
+        if damage_to_player_rng < 3:
+            print(f'\n Из-за дрожи под ногами вы подскользнулись и ударились головой об пол. Отряхнувшись, вы встаёте, но на вас упал потолок комнаты. Тряска оказалась для вас смертельной.')
+            game_state['game_over'] = True
+        
+        #повезло - можно играть дальше
+        else:
+            print('\n Вы чудом уцелели в этой тряске')
+        
+
+#случайности не случайны
+def random_event(game_state):
+    steps_taken = game_state['steps_taken']
+    
+    #если выпадает 0 - активируется одно событие из трех
+    if pseudo_random(steps_taken, 10) == 0:
+        scripted_event = pseudo_random(steps_taken, 3)
+        print('\n Вы стали свидетелем необычного события.')
+        
+        #при этом событии в комнату добавляется монетка
+        if scripted_event == 0:
+            print('\n Вы видите на полу что-то блестящее.')
+            room_items = constants.ROOMS[game_state['current_room']]['items']
+            room_items.append('coin')
+            
+        #при этом событии появляется нечто, которое можно отпугнуть мечом
+        if scripted_event == 1:
+            print('\n Вы слышите странный шорох.')
+            if 'sword' in game_state['player_inventory']:
+                print('\n Он стих довольно быстро, как только ваш меч блеснул на свету от факелов, расставленных по комнате')
+                
+        #при этом событии, если игрок находится в trap_room, он либо потеряет предмет, либо получит урон    
+        if scripted_event == 2:
+            player_in_trap_room = game_state['current_room'] == 'trap_room' #присваиваем комнату
+            player_has_no_torch = torch not in game_state['player_inventory'] #а также отсутствие факела
+            
+            if player_in_trap_room and player_has_no_torch:
+                print('\n Всё вокруг вас вдруг затряслось!')
+                trigger_trap(game_state)
+                
+    #если выпало что либо кроме 0 - ничего не происходит            
+    else:
+        return
+        
     

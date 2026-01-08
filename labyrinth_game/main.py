@@ -14,9 +14,16 @@ game_state = {
 def process_command(game_state, command):
     player_command = command.split() #отделяем команду от аргумента
     
-    #проверяем, точно ли пользователь что-то ввёл
+    #проверяем, точно ли игрок что-то ввёл
     if not player_command:
-        return 'Вы не ввели команду'
+        print('Вы не ввели команду')
+        return
+    
+    possible_directions = ['north', 'south', 'east', 'west'] #вводим переменную для перемещения по односложным командам
+    
+    #если ввод игрока состоит из одного слова и это одно слово есть в введенной ранее переменной = добавляем go в начало
+    if len(player_command) == 1 and player_command[0] in possible_directions:
+        player_command.insert(0, 'go')
     
     #спасибо за возможность использовать эту конструкцию, понравилась куда больше, чем просто if/else
     match player_command:
@@ -52,7 +59,7 @@ def process_command(game_state, command):
                 
         #если игроку нужна помощь       
         case ['help']:
-            utils.show_help()
+            utils.show_help(constants.COMMANDS)
         
         #если игрок решил выйти из игры    
         case ['quit']:

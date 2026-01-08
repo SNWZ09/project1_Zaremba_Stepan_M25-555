@@ -25,12 +25,28 @@ def move_player(game_state, direction):
     room_name = game_state['current_room']
     room_exits = constants.ROOMS[room_name]['exits'] #берем все выходы, которые есть у нашей комнаты
     
+    
     #проверяем, есть ли такой выход, какой ввёл пользователь
     if direction in room_exits:
         next_room = room_exits[direction]
+        
+        #проверяем следующую комнату
+        if next_room == 'treasure_room':
+        
+            #проверяем наличие ключа
+            if 'rusty_key' in game_state['player_inventory']:
+                print('Вы используете найденный ключ, чтобы открыть путь в комнату сокровищ.')
+               
+            #если ключа нет - игрок не перейдет в комнату сокровищ   
+            else:
+                print("Дверь заперта. Нужен ключ, чтобы пройти дальше.")
+                return
+        
         game_state['current_room'] = next_room #переходим в следующую комнату
         game_state['steps_taken'] += 1 #увеличиваем шаг
         utils.describe_current_room(game_state) #описываем следующую комнату
+        utils.random_event(game_state) #случайные события
+        
     else:
         print('\n Нельзя пойти в этом направлении.')
 
