@@ -1,20 +1,25 @@
-from labyrinth_game import constants, utils #подключаем все созданные ранее модули
+from labyrinth_game import constants, utils  #подключаем все созданные ранее модули
+
 
 #функция отображения инвентаря, принимает аргумент - словарь
 def show_inventory(game_state):
     player_inventory = game_state['player_inventory'] #присваеваем переменной инвентарь
     
-    division = '_' * 50 #ввёл разделитель, чтобы было удобнее выводить информацию
+    #ввёл разделитель, чтобы было удобнее выводить информацию
+    division = '_' * 50 
+    
     #проверяем его наполнение
     if player_inventory: 
-        print(f'\n {division} \n В инвентаре следующие предметы: {', '.join(player_inventory)}.')
+        print(f'\n {division} \n Инвентарь: {", ".join(player_inventory)}.')
     else:
         print('\n Ваш инвентарь пуст')
         
  #ввод пользователя  
 def get_input(prompt="> "):
     try:
-        player_command = input(prompt).lower() #приводим в нижний регистр для "унификации" ответов и вводов
+    
+        #приводим в нижний регистр для "унификации" ответов и вводов
+        player_command = input(prompt).lower() 
         return player_command
     except (KeyboardInterrupt, EOFError):
         print("\n Выход из игры.")
@@ -23,7 +28,9 @@ def get_input(prompt="> "):
 #функция перемещения
 def move_player(game_state, direction):
     room_name = game_state['current_room']
-    room_exits = constants.ROOMS[room_name]['exits'] #берем все выходы, которые есть у нашей комнаты
+    
+    #берем все выходы, которые есть у нашей комнаты
+    room_exits = constants.ROOMS[room_name]['exits']
     
     
     #проверяем, есть ли такой выход, какой ввёл пользователь
@@ -35,16 +42,19 @@ def move_player(game_state, direction):
         
             #проверяем наличие ключа
             if 'rusty_key' in game_state['player_inventory']:
-                print('Вы используете найденный ключ, чтобы открыть путь в комнату сокровищ.')
+                print('Вы используете ключ, чтобы открыть путь в комнату сокровищ.')
                
             #если ключа нет - игрок не перейдет в комнату сокровищ   
             else:
                 print("Дверь заперта. Нужен ключ, чтобы пройти дальше.")
                 return
         
-        game_state['current_room'] = next_room #переходим в следующую комнату
+        #переходим в следующую комнату
+        game_state['current_room'] = next_room 
         game_state['steps_taken'] += 1 #увеличиваем шаг
-        utils.describe_current_room(game_state) #описываем следующую комнату
+        
+        #описываем следующую комнату
+        utils.describe_current_room(game_state) 
         utils.random_event(game_state) #случайные события
         
     else:
@@ -53,7 +63,9 @@ def move_player(game_state, direction):
 #функция взятия предмета
 def take_item(game_state, item_name):
     room_name = game_state['current_room']
-    room_items = constants.ROOMS[room_name]['items'] #берем все предметы, которые есть у нашей комнаты
+    
+    #берем все предметы, которые есть у нашей комнаты
+    room_items = constants.ROOMS[room_name]['items']
     
     #добавим вариант, если игрок попытается поднять сундук
     if item_name == 'treasure_chest':
@@ -62,7 +74,9 @@ def take_item(game_state, item_name):
     
     #проверяем, есть ли такой предмет, какой ввёл пользователь
     if item_name in room_items:
-        game_state['player_inventory'].append(item_name) #добавляем ему в инвентарь
+    
+        #добавляем ему в инвентарь
+        game_state['player_inventory'].append(item_name) 
         room_items.remove(item_name) #удаляем из комнаты предмет
         print('\n Вы подняли: ', item_name)
     else:
@@ -80,7 +94,8 @@ def use_item(game_state, item_name):
         
     #делаем вывод для меча    
     elif item_name == 'sword':
-        print('\n Вы взяли в руки меч. Вы чувствуете уверенность перед предстоящими трудностями.')
+        print('\n Вы взяли в руки меч.')
+        print('\n Вы чувствуете уверенность перед предстоящими трудностями.')
         
     #делаем вывод для шкатулки    
     elif item_name == 'bronze_box':

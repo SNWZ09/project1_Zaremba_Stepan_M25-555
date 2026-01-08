@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
-from labyrinth_game import constants, player_actions, utils #подключаем все созданные ранее модули
+from labyrinth_game import (  #подключаем все созданные ранее модули
+    constants,
+    player_actions,
+    utils,
+)
 
 #определяем состояние игрока
 game_state = {
@@ -19,13 +23,16 @@ def process_command(game_state, command):
         print('Вы не ввели команду')
         return
     
-    possible_directions = ['north', 'south', 'east', 'west'] #вводим переменную для перемещения по односложным командам
+    #вводим переменную для перемещения по односложным командам
+    possible_directions = ['north', 'south', 'east', 'west'] 
     
-    #если ввод игрока состоит из одного слова и это одно слово есть в введенной ранее переменной = добавляем go в начало
+    #если ввод игрока состоит из одного слова и это одно слово есть в списке
+    #тогда добавляем go в начало
     if len(player_command) == 1 and player_command[0] in possible_directions:
         player_command.insert(0, 'go')
     
-    #спасибо за возможность использовать эту конструкцию, понравилась куда больше, чем просто if/else
+    #спасибо за возможность использовать эту конструкцию
+    #понравилась куда больше, чем просто if/else
     match player_command:
         #если игрок решил осмотреться
         case ['look']:

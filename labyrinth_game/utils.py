@@ -1,37 +1,42 @@
 import math
-from labyrinth_game import constants, player_actions 
 
-#функция описания комнаты принмает словарь в качестве аргумента и получает из константы все данные
+from labyrinth_game import constants, player_actions
+
+
+#функция принмает словарь в качестве аргумента, получает из константы все данные
 def describe_current_room(game_state):
     room_name = game_state['current_room']
     room_info = constants.ROOMS[room_name] #получаем всю информацию о комнате
     
-    division = '_' * 80 #ввёл разделитель, чтобы было удобнее выводить информацию
+    #ввёл разделитель, чтобы было удобнее выводить информацию
+    division = '_' * 80 
     
     #теперь выводим её
     print(f'\n {division} \n {room_name.upper()}')
     
     #описание комнаты
-    print(f'\n {division} \n {room_info['description']}')
+    print(f'\n {division} \n {room_info["description"]}')
     
     #проверяем, не нулевое ли значение предметов. Если не нулевое - выводим.
     room_items = room_info['items']
     if room_items:
-        print(f'\n {division} \n Заметные предметы: {', '.join(room_items)}')
+        print(f'\n {division} \n Заметные предметы: {", ".join(room_items)}')
     
     #выводим, какие выходы есть в комнате
     room_exits = room_info['exits'].keys()
-    print(f'\n {division} \n Выходы: {', '.join(room_exits)}')
+    print(f'\n {division} \n Выходы: {", ".join(room_exits)}')
     
     #так же, как и с предметами, идет проверка на наличие загадки.
     room_puzzle = room_info['puzzle']
     if room_puzzle:
-        print(f'\n {division} \n Кажется, здесь есть загадка (используйте команду solve).')
+        print(f'\n {division} \n Здесь есть загадка (используйте команду solve).')
 
 def solve_puzzle(game_state):
     room_name = game_state['current_room']
     room_info = constants.ROOMS[room_name] #получаем всю информацию о комнате
-    puzzle_info = room_info['puzzle'] #получаем информацию конкретно о загадке комнаты
+    
+    #получаем информацию конкретно о загадке комнаты
+    puzzle_info = room_info['puzzle'] 
     
     #проверим, есть ли вообще загадка
     if not puzzle_info:
@@ -39,32 +44,42 @@ def solve_puzzle(game_state):
 
         return #завершаем выполнение функции, если загадок нет
         
-    puzzle_question, puzzle_answer = puzzle_info #присваиваем переменным загадку и ответ на неё + выводим условия загадки
+    #присваиваем переменным загадку и ответ на неё + выводим условия загадки
+    puzzle_question, puzzle_answer = puzzle_info
     print(f'\n Комната содержит следующую загадку: \n {puzzle_question}')
     
-    player_answer = player_actions.get_input('\n Ваш ответ на загадку: ') #получаем ответ игрока
+    #получаем ответ игрока
+    player_answer = player_actions.get_input('\n Ваш ответ на загадку: ')
     
-    #т.к. я поменял структуру ответов на загадки в constants, тут теперь идет проверка по каждому элементу списка ответов
-    if player_answer.lower() in [each_answer.lower() for each_answer in puzzle_answer]:
+    #т.к. я поменял структуру ответов на загадки в constants, 
+    #тут теперь идет проверка по каждому элементу списка ответов
+    if player_answer.lower() in [answer.lower() for answer in puzzle_answer]:
         print('\n Вы верно решили загадку! Поздравляем!!')
         room_info['puzzle'] = None
         
         if room_name == 'hall':
-            print('\n Назвав правильное число, вы замечаете, что буквы надписи начали двигаться, создав уникальный узор с сообщением по центру: Ученье - свет. Неученье - тьма.')
+            print('\n Вы замечаете, что буквы надписи начали двигаться.')
+            print('\n Они создали сообщение по центру: Ученье - свет. Неученье - тьма.')
         
         elif room_name == 'trap_room':
-            print('\n Вы чудом избежали смертельного ранения, после чего решили уйти из этой комнаты подальше')
+            print('\n Вы чудом избежали смертельного ранения')
             
         elif room_name == 'library':
-            print('\n Получив правильный ответ, свиток засверкал. "Ученье - свет. Неученье - тьма", промолвили вы, наблюдая, как древний манускрипт превращается в ключ от сокровищницы. В инвентарь был добавлен ключ от сокровищницы. Знания - сила.')
+            print('\n Получив правильный ответ, свиток засверкал')
+            print('\n Ученье - свет. Неученье - тьма", промолвили вы')
+            print('\n В инвентарь был добавлен ключ от сокровищницы. Знания - сила.')
             game_state['player_inventory'].append('treasure_key')
         
         elif room_name == 'torture_room':
-            print('\n Вы решаете ещё раз осмотреть комнату. Может быть, ответ "3" был секретом к чему-то большему, находящемуся в этой комнате? Вы окидываете взглядом все инструменты и устройства. Вам становится не по себе, и вы решаете поскорее уйти.')
+            print('\n Вы решаете ещё раз осмотреть комнату.')
+            print('\n Может быть, ответ "3" был секретом к чему-то большему?')
+            print('\n Вы окидываете взглядом все инструменты и устройства.')
+            print('\n Вам становится не по себе, и вы решаете поскорее уйти.')
             
         
         else:
-            print('\n Загадка успешно решена, но изменений вы не заметили. Зато потренировали мозг.')
+            print('\n Загадка успешно решена, но изменений вы не заметили.')
+            print('\n Зато потренировали мозг.')
     
     else:
 
@@ -78,14 +93,18 @@ def solve_puzzle(game_state):
 #логика победы    
 def attempt_open_treasure(game_state):
     room_name = game_state['current_room']
-    room_info = constants.ROOMS[room_name] #получаем всю информацию о комнате
-    puzzle_info = room_info['puzzle'] #получаем информацию конкретно о загадке комнаты
+    
+    #получаем всю информацию о комнате
+    room_info = constants.ROOMS[room_name]
+    
+    #получаем информацию конкретно о загадке комнаты
+    puzzle_info = room_info['puzzle']
     
     #проверка наличия ключа в инвентаре
     if 'treasure_key' in game_state['player_inventory']:
         print('\n Вы применяете ключ, и замок щёлкает. Сундук открыт!')
             
-            #если ключ есть и игрок открыл сундук - удаляем сундук из комнаты
+        #если ключ есть и игрок открыл сундук - удаляем сундук из комнаты
         if 'treasure_chest' in room_info['items']:
             room_info['items'].remove('treasure_chest')
         
@@ -95,19 +114,20 @@ def attempt_open_treasure(game_state):
         return
     
     #если ключа нет - предлагаем ввести код (решив загадку)
-    player_choice = player_actions.get_input('\n Сундук заперт. ... Ввести код? (yes/no): ')
+    player_choice = player_actions.get_input('\n Сундук заперт. Ввести код? (yes/no): ')
     
     #если игрок сказал "да" - выводим загадку
     if player_choice == 'yes':
-        treasure_puzzle = room_info['puzzle']
-        puzzle_question, puzzle_answer = puzzle_info #присваиваем переменным загадку и ответ на неё + выводим условия загадки
+               
+        #присваиваем переменным загадку и ответ на неё
+        puzzle_question, puzzle_answer = puzzle_info
         print('\n', puzzle_question)
         
         #получаем ответ от игрока
         player_answer = player_actions.get_input('Ваш ответ: ')
         
         #сверяем ответ игрока с изначально заложенным в загадку
-        if player_answer.lower() in [each_answer.lower() for each_answer in puzzle_answer]:
+        if player_answer.lower() in [answer.lower() for answer in puzzle_answer]:
             print('\n Ваш код подошел!')
             
             #если ответ подошел - удаляем сундук
@@ -129,7 +149,7 @@ def attempt_open_treasure(game_state):
 #функция помощи
 def show_help(commands):
     for command, description in commands.items():
-        print(f"  {command:<16} - {description}") #скажу честно, это ии, я вообще не понял/забыл про "позиционирование слева" и "дополнение пробелами в количестве 16 штук", извините
+        print(f"  {command:<16} - {description}")
 
 
 
@@ -158,13 +178,15 @@ def trigger_trap(game_state):
     
     #смотрим, есть ли в инвентаре игрока предметы
     if player_inventory:
+    
         #рандомно выбираем один предмет из инвентаря
-        item_losing_process = pseudo_random(game_state['steps_taken'], len(player_inventory))
+        item_losing_process = pseudo_random(game_state['steps_taken'], 
+                                            len(player_inventory))
         
         #игрок его теряет
         item_lost = player_inventory.pop(item_losing_process)
         
-        print(f'\n От дрожи вы упали, ударились головой об пол и выронили {item_lost}. Сожалеем о вашей потере.')
+        print(f'\n Вы упали, ударились головой об пол и выронили {item_lost}.')
     
     #нет предметов - роллим урон
     else:
@@ -172,7 +194,7 @@ def trigger_trap(game_state):
         
         #неповезло - проигрыш
         if damage_to_player_rng < 3:
-            print(f'\n Из-за дрожи под ногами вы подскользнулись и ударились головой об пол. Отряхнувшись, вы встаёте, но на вас упал потолок комнаты. Тряска оказалась для вас смертельной.')
+            print('\n Вы подскользнулись и ударились головой об пол.')
             game_state['game_over'] = True
         
         #повезло - можно играть дальше
@@ -195,16 +217,20 @@ def random_event(game_state):
             room_items = constants.ROOMS[game_state['current_room']]['items']
             room_items.append('coin')
             
-        #при этом событии появляется нечто, которое можно отпугнуть мечом
+        #появляется нечто, которое можно отпугнуть мечом
         if scripted_event == 1:
             print('\n Вы слышите странный шорох.')
             if 'sword' in game_state['player_inventory']:
-                print('\n Он стих довольно быстро, как только ваш меч блеснул на свету от факелов, расставленных по комнате')
+                print('\n Он стих довольно быстро, как только увидел ваш меч.')
                 
-        #при этом событии, если игрок находится в trap_room, он либо потеряет предмет, либо получит урон    
+        #если игрок находится в trap_room - потеряет предмет или получит урон    
         if scripted_event == 2:
-            player_in_trap_room = game_state['current_room'] == 'trap_room' #присваиваем комнату
-            player_has_no_torch = torch not in game_state['player_inventory'] #а также отсутствие факела
+            
+            #присваиваем комнату
+            player_in_trap_room = game_state['current_room'] == 'trap_room'
+            
+            #а также отсутствие факела
+            player_has_no_torch = 'torch' not in game_state['player_inventory']
             
             if player_in_trap_room and player_has_no_torch:
                 print('\n Всё вокруг вас вдруг затряслось!')
