@@ -49,6 +49,10 @@ def process_command(game_state, command):
             #условие для всех остальных комнат с загадками
             else:
                 utils.solve_puzzle(game_state)
+                
+        #если игроку нужна помощь       
+        case ['help']:
+            utils.show_help()
         
         #если игрок решил выйти из игры    
         case ['quit']:
